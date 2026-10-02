@@ -1,0 +1,28 @@
+# Prometheus Configuration for Production API Platform
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Production API Platform metrics
+  - job_name: 'production-api-platform'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['production-api-platform:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'api-platform'

@@ -1,0 +1,33 @@
+# ConfigMap for Cloud Native Microservices
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-native-microservices-config
+  labels:
+    app: cloud-native-microservices
+data:
+  spring.profiles.active: "kubernetes"
+  application.yml: |
+    spring:
+      application:
+        name: cloud-native-microservices
+    
+    server:
+      port: 8080
+      shutdown: graceful
+    
+    # Graceful shutdown
+    spring.lifecycle:
+      timeout-per-shutdown-phase: 20s
+    
+    # Kubernetes-specific configuration
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus,circuitbreakers
+      endpoint:
+        health:
+          probes:
+            enabled: true
+          show-details: always

@@ -1,0 +1,129 @@
+server:
+  port: 8086
+  shutdown: graceful
+
+spring:
+  application:
+    name: observability-reliability-platform
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# Actuator and Prometheus Metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.75, 0.95, 0.99
+  tracing:
+    sampling:
+      probability: 1.0
+
+# Observability Platform Configuration
+observability:
+  # Alert configuration
+  alert:
+    evaluation-interval: 30000  # 30 seconds
+    default-for-duration: PT1M  # 1 minute
+
+  # SLO configuration
+  slo:
+    calculation-interval: 60000  # 1 minute
+    default-window: P30D        # 30 days
+
+  # Data retention configuration
+  retention:
+    metrics: P7D      # 7 days
+    traces: P1D       # 1 day
+    alerts: P30D      # 30 days
+    health: P7D       # 7 days
+    slo-status: P30D  # 30 days
+    prune-interval: 3600000  # 1 hour
+
+  # Tracing configuration
+  tracing:
+    slow-threshold: PT500MS  # 500ms
+    sample-rate: 1.0
+
+  # Health check configuration
+  health:
+    check-interval: 30000  # 30 seconds
+    timeout: 5000          # 5 seconds
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.portfolio.observability: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    com.portfolio.observability: DEBUG
+    org.springframework: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    com.portfolio.observability: INFO
+
+observability:
+  alert:
+    evaluation-interval: 15000  # More frequent in production
+  retention:
+    metrics: P30D
+    traces: P7D
+    alerts: P90D
+
+---
+# Docker Profile
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

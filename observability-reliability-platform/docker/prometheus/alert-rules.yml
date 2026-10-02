@@ -1,0 +1,138 @@
+# Prometheus Alert Rules for Observability Platform
+groups:
+  # Application Health Alerts
+  - name: application-health
+    rules:
+      - alert: ApplicationDown
+        expr: up{job="observability-platform"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Observability Platform is down"
+          description: "The observability platform has been down for more than 1 minute."
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) 
+          / sum(rate(http_server_requests_seconds_count[5m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for the last 2 minutes. Current: {{ $value | printf \"%.2f\" }}%"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le)) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency detected"
+          description: "P95 latency is above 1 second. Current: {{ $value | printf \"%.2f\" }}s"
+
+  # JVM Alerts
+  - name: jvm-health
+    rules:
+      - alert: HighMemoryUsage
+        expr: |
+          sum(jvm_memory_used_bytes{area="heap"}) / sum(jvm_memory_max_bytes{area="heap"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High JVM heap memory usage"
+          description: "JVM heap memory usage is above 85%. Current: {{ $value | printf \"%.2f\" }}%"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          sum(jvm_memory_used_bytes{area="heap"}) / sum(jvm_memory_max_bytes{area="heap"}) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical JVM heap memory usage"
+          description: "JVM heap memory usage is above 95%. Current: {{ $value | printf \"%.2f\" }}%"
+
+      - alert: HighGCTime
+        expr: |
+          rate(jvm_gc_pause_seconds_sum[5m]) / rate(jvm_gc_pause_seconds_count[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High garbage collection time"
+          description: "Average GC pause time is above 500ms. Current: {{ $value | printf \"%.2f\" }}s"
+
+      - alert: TooManyThreads
+        expr: jvm_threads_live_threads > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many JVM threads"
+          description: "JVM has more than 500 live threads. Current: {{ $value }}"
+
+  # Observability Platform Custom Alerts
+  - name: observability-alerts
+    rules:
+      - alert: ManyActiveAlerts
+        expr: observability_active_alerts > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many active alerts"
+          description: "There are more than 10 active alerts. Current: {{ $value }}"
+
+      - alert: CriticalActiveAlerts
+        expr: observability_active_alerts > 50
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical number of active alerts"
+          description: "There are more than 50 active alerts. Current: {{ $value }}"
+
+      - alert: UnhealthyServices
+        expr: observability_unhealthy_services > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unhealthy services detected"
+          description: "{{ $value }} services are unhealthy."
+
+      - alert: HighSpanVolume
+        expr: rate(observability_spans_recorded_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High span ingestion rate"
+          description: "Span ingestion rate is above 1000/s. Current: {{ $value | printf \"%.2f\" }}/s"
+
+  # SLO Alerts
+  - name: slo-alerts
+    rules:
+      - alert: SLOAtRisk
+        expr: |
+          (100 - observability_slo_error_budget_remaining) > 50
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "SLO Error Budget at Risk"
+          description: "More than 50% of error budget consumed."
+
+      - alert: SLOBreach
+        expr: |
+          (100 - observability_slo_error_budget_remaining) > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SLO Error Budget Nearly Exhausted"
+          description: "More than 90% of error budget consumed. Immediate action required."

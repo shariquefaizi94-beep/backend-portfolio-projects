@@ -1,0 +1,75 @@
+# Prometheus Configuration for Observability Platform
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'observability-platform'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load alert rules
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # Observability Platform Application
+  - job_name: 'observability-platform'
+    static_configs:
+      - targets: ['observability-platform:8080']
+    metrics_path: /actuator/prometheus
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # JVM Metrics from Spring Boot Actuator
+  - job_name: 'jvm-metrics'
+    static_configs:
+      - targets: ['observability-platform:8080']
+    metrics_path: /actuator/prometheus
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'jvm_.*'
+        action: keep
+
+  # HTTP Request Metrics
+  - job_name: 'http-metrics'
+    static_configs:
+      - targets: ['observability-platform:8080']
+    metrics_path: /actuator/prometheus
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'http_.*'
+        action: keep
+
+  # Custom Observability Metrics
+  - job_name: 'observability-custom'
+    static_configs:
+      - targets: ['observability-platform:8080']
+    metrics_path: /actuator/prometheus
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'observability_.*'
+        action: keep
+
+  # Grafana Metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    metrics_path: /metrics
+
+  # Jaeger Metrics
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+    metrics_path: /metrics

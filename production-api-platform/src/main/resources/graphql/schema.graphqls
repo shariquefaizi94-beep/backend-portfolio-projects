@@ -1,0 +1,263 @@
+# GraphQL Schema for Production API Platform
+# Demonstrates GraphQL API design with queries, mutations, and subscriptions
+
+# Scalar types
+scalar UUID
+scalar BigDecimal
+scalar DateTime
+
+# ============================================
+# Product Types
+# ============================================
+
+enum ProductStatus {
+    ACTIVE
+    INACTIVE
+    OUT_OF_STOCK
+    DISCONTINUED
+    PENDING_REVIEW
+}
+
+type Product {
+    id: UUID!
+    name: String!
+    description: String
+    category: String!
+    price: BigDecimal!
+    currency: String!
+    stockQuantity: Int!
+    status: ProductStatus!
+    available: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+input CreateProductInput {
+    name: String!
+    description: String
+    category: String!
+    price: BigDecimal!
+    currency: String
+    stockQuantity: Int!
+}
+
+input UpdateProductInput {
+    name: String
+    description: String
+    category: String
+    price: BigDecimal
+    stockQuantity: Int
+}
+
+input ProductFilter {
+    category: String
+    status: ProductStatus
+    minPrice: BigDecimal
+    maxPrice: BigDecimal
+    available: Boolean
+}
+
+# ============================================
+# Order Types
+# ============================================
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    PROCESSING
+    SHIPPED
+    DELIVERED
+    CANCELLED
+    REFUNDED
+}
+
+type OrderItem {
+    productId: UUID!
+    productName: String!
+    quantity: Int!
+    unitPrice: BigDecimal!
+    totalPrice: BigDecimal!
+}
+
+type Order {
+    id: UUID!
+    userId: UUID!
+    items: [OrderItem!]!
+    subtotal: BigDecimal!
+    tax: BigDecimal!
+    total: BigDecimal!
+    status: OrderStatus!
+    shippingAddress: String!
+    billingAddress: String!
+    totalItems: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+input OrderItemInput {
+    productId: UUID!
+    quantity: Int!
+}
+
+input CreateOrderInput {
+    userId: UUID!
+    items: [OrderItemInput!]!
+    shippingAddress: String!
+    billingAddress: String!
+}
+
+input OrderFilter {
+    userId: UUID
+    status: OrderStatus
+    startDate: DateTime
+    endDate: DateTime
+}
+
+# ============================================
+# User Types
+# ============================================
+
+enum Role {
+    USER
+    PREMIUM
+    ADMIN
+    API_CLIENT
+    SERVICE_ACCOUNT
+}
+
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+    PENDING_VERIFICATION
+    DELETED
+}
+
+enum RateLimitTier {
+    FREE
+    BASIC
+    PREMIUM
+    ENTERPRISE
+    UNLIMITED
+}
+
+type User {
+    id: UUID!
+    username: String!
+    email: String!
+    roles: [Role!]!
+    status: UserStatus!
+    rateLimitTier: RateLimitTier!
+    createdAt: DateTime!
+    lastLoginAt: DateTime
+}
+
+input CreateUserInput {
+    username: String!
+    email: String!
+    password: String!
+    roles: [Role!]
+    rateLimitTier: RateLimitTier
+}
+
+# ============================================
+# Pagination Types
+# ============================================
+
+type PageInfo {
+    totalElements: Int!
+    totalPages: Int!
+    currentPage: Int!
+    pageSize: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type ProductConnection {
+    products: [Product!]!
+    pageInfo: PageInfo!
+}
+
+type OrderConnection {
+    orders: [Order!]!
+    pageInfo: PageInfo!
+}
+
+# ============================================
+# Analytics Types
+# ============================================
+
+type ProductStats {
+    totalProducts: Int!
+    activeProducts: Int!
+    outOfStockProducts: Int!
+    categoryCounts: [CategoryCount!]!
+}
+
+type OrderStats {
+    totalOrders: Int!
+    pendingOrders: Int!
+    completedOrders: Int!
+    cancelledOrders: Int!
+    totalRevenue: BigDecimal!
+}
+
+type CategoryCount {
+    category: String!
+    count: Int!
+}
+
+# ============================================
+# Query Root
+# ============================================
+
+type Query {
+    # Product queries
+    product(id: UUID!): Product
+    products(filter: ProductFilter, page: Int, size: Int): ProductConnection!
+    searchProducts(searchTerm: String!, limit: Int): [Product!]!
+    productStats: ProductStats!
+    
+    # Order queries
+    order(id: UUID!): Order
+    orders(filter: OrderFilter, page: Int, size: Int): OrderConnection!
+    ordersByUser(userId: UUID!): [Order!]!
+    orderStats: OrderStats!
+    
+    # User queries
+    user(id: UUID!): User
+    userByUsername(username: String!): User
+    userByEmail(email: String!): User
+}
+
+# ============================================
+# Mutation Root
+# ============================================
+
+type Mutation {
+    # Product mutations
+    createProduct(input: CreateProductInput!): Product!
+    updateProduct(id: UUID!, input: UpdateProductInput!): Product
+    updateProductStock(id: UUID!, quantity: Int!): Product
+    updateProductPrice(id: UUID!, price: BigDecimal!): Product
+    deleteProduct(id: UUID!): Boolean!
+    
+    # Order mutations
+    createOrder(input: CreateOrderInput!): Order!
+    updateOrderStatus(id: UUID!, status: OrderStatus!): Order
+    cancelOrder(id: UUID!): Order
+    
+    # User mutations
+    createUser(input: CreateUserInput!): User!
+    deleteUser(id: UUID!): Boolean!
+}
+
+# ============================================
+# Subscription Root (for real-time updates)
+# ============================================
+
+type Subscription {
+    orderCreated: Order!
+    orderStatusChanged(userId: UUID): Order!
+    productStockLow(threshold: Int): Product!
+}

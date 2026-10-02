@@ -1,0 +1,12 @@
+# Pod Disruption Budget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cloud-native-microservices-pdb
+  labels:
+    app: cloud-native-microservices
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cloud-native-microservices

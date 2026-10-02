@@ -1,0 +1,97 @@
+# Istio VirtualService for traffic management
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cloud-native-microservices
+  labels:
+    app: cloud-native-microservices
+spec:
+  hosts:
+    - cloud-native-microservices
+    - cloud-native.example.com
+  gateways:
+    - mesh
+    - cloud-native-gateway
+  http:
+    # Route configuration with retries and timeouts
+    - match:
+        - uri:
+            prefix: /api/
+      route:
+        - destination:
+            host: cloud-native-microservices
+            port:
+              number: 8080
+      timeout: 30s
+      retries:
+        attempts: 3
+        perTryTimeout: 10s
+        retryOn: gateway-error,connect-failure,refused-stream,5xx
+    # Health endpoints
+    - match:
+        - uri:
+            prefix: /health/
+        - uri:
+            prefix: /actuator/
+      route:
+        - destination:
+            host: cloud-native-microservices
+            port:
+              number: 8080
+      timeout: 5s
+---
+# Istio DestinationRule for load balancing and circuit breaking
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cloud-native-microservices
+  labels:
+    app: cloud-native-microservices
+spec:
+  host: cloud-native-microservices
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 5s
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 100
+        maxRetries: 3
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+---
+# Istio Gateway for external traffic
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: cloud-native-gateway
+  labels:
+    app: cloud-native-microservices
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - cloud-native.example.com
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: cloud-native-tls
+      hosts:
+        - cloud-native.example.com

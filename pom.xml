@@ -48,14 +48,14 @@
         <!-- Project 3: Real-Time Streaming Analytics -->
         <module>realtime-streaming-analytics</module>
         
-        <!-- Project 4: Production API Platform (TODO) -->
-        <!-- <module>production-api-platform</module> -->
+        <!-- Project 4: Production API Platform -->
+        <module>production-api-platform</module>
         
-        <!-- Project 5: Cloud-Native Microservices (TODO) -->
-        <!-- <module>cloud-native-microservices</module> -->
+        <!-- Project 5: Cloud-Native Microservices -->
+        <module>cloud-native-microservices</module>
         
-        <!-- Project 6: Observability & Reliability Platform (TODO) -->
-        <!-- <module>observability-reliability-platform</module> -->
+        <!-- Project 6: Observability & Reliability Platform -->
+        <module>observability-reliability-platform</module>
     </modules>
 
     <properties>

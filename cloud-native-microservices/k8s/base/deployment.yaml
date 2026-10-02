@@ -1,0 +1,104 @@
+# Kubernetes Deployment for Cloud Native Microservices
+# Demonstrates production-ready deployment patterns
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-native-microservices
+  labels:
+    app: cloud-native-microservices
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cloud-native-microservices
+  template:
+    metadata:
+      labels:
+        app: cloud-native-microservices
+        version: v1
+      annotations:
+        # Enable Istio sidecar injection
+        sidecar.istio.io/inject: "true"
+        # Prometheus scrape configuration
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      serviceAccountName: cloud-native-microservices
+      containers:
+        - name: cloud-native-microservices
+          image: cloud-native-microservices:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: JAVA_OPTS
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: cloud-native-microservices-config
+                  key: spring.profiles.active
+            - name: PRODUCT_SERVICE_URL
+              value: "http://product-service:8081"
+            - name: INVENTORY_SERVICE_URL
+              value: "http://inventory-service:8082"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:8083"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Liveness probe - restarts pod if failed
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Readiness probe - removes from service if failed
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Startup probe - for slow starting applications
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: cloud-native-microservices-config
+      # Pod anti-affinity for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: cloud-native-microservices
+                topologyKey: kubernetes.io/hostname
+      # Termination grace period for graceful shutdown
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: cloud-native-microservices-test
+  
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    root: WARN
+    com.portfolio.cloudnative: DEBUG

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: observability-test
+
+# Disable scheduling during tests
+observability:
+  alert:
+    evaluation-interval: 999999999
+  slo:
+    calculation-interval: 999999999
+  retention:
+    prune-interval: 999999999
+
+logging:
+  level:
+    root: WARN
+    com.portfolio.observability: INFO

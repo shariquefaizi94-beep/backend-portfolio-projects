@@ -1,0 +1,33 @@
+# Kubernetes Service for Cloud Native Microservices
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-native-microservices
+  labels:
+    app: cloud-native-microservices
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: cloud-native-microservices
+---
+# Headless service for service mesh and direct pod communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-native-microservices-headless
+  labels:
+    app: cloud-native-microservices
+spec:
+  clusterIP: None
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: cloud-native-microservices

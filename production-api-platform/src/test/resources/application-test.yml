@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: production-api-platform-test
+  
+  graphql:
+    graphiql:
+      enabled: false
+    path: /graphql
+
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    root: WARN
+    com.portfolio.api: DEBUG
