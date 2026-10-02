@@ -1,0 +1,26 @@
+# Analytics API Dockerfile
+FROM eclipse-temurin:21-jre-alpine
+
+LABEL maintainer="nexaforge"
+LABEL description="Analytics API - REST API for real-time analytics queries"
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Copy built JAR
+COPY analytics-api/target/analytics-api-*.jar app.jar
+
+# Set ownership
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+EXPOSE 8080
+
+# JVM tuning for API workloads
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -1,0 +1,30 @@
+server:
+  port: 8093
+spring:
+  application:
+    name: analytics-api
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+elasticsearch:
+  url: ${ELASTICSEARCH_URL:http://localhost:9200}
+  metrics-index: aggregated-metrics
+
+cache:
+  ttl-seconds: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.nexaforge.analytics: DEBUG

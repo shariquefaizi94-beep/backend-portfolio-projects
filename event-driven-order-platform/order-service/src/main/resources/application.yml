@@ -1,0 +1,77 @@
+server:
+  port: 8081
+  shutdown: graceful
+
+spring:
+  application:
+    name: order-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_db
+    username: ${DB_USERNAME:order_user}
+    password: ${DB_PASSWORD:order_pass}
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: order-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: com.nexaforge.common.event
+    listener:
+      ack-mode: manual
+      concurrency: 3
+
+kafka:
+  topics:
+    order-events: order.events
+    payment-events: payment.events
+    inventory-events: inventory.events
+    shipping-events: shipping.events
+    notification-events: notification.events
+    compensation-events: order.compensation
+
+outbox:
+  poll-interval-ms: 1000
+  batch-size: 50
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.nexaforge.order: DEBUG
+  pattern:
+    console: "%d{ISO8601} [%thread] [%X{correlationId:-}] %-5level %logger{36} - %msg%n"

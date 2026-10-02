@@ -1,0 +1,120 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: workflow-orchestration-platform
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/workflow_db
+    username: ${DB_USERNAME:workflow_user}
+    password: ${DB_PASSWORD:workflow_pass}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 5000ms
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+    consumer:
+      group-id: workflow-orchestrator
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: com.nexaforge.workflow.domain.event
+    listener:
+      ack-mode: manual
+      concurrency: 3
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# Workflow Engine Configuration
+workflow:
+  retry:
+    max-attempts: 3
+    initial-delay-ms: 1000
+    multiplier: 2.0
+    max-delay-ms: 30000
+  compensation:
+    enabled: true
+    timeout-seconds: 60
+  idempotency:
+    cache-ttl-minutes: 60
+
+# Kafka Topics
+kafka:
+  topics:
+    workflow-commands: workflow.commands
+    workflow-events: workflow.events
+    workflow-dlq: workflow.events.dlq
+    compensation-commands: workflow.compensation.commands
+
+# Actuator / Observability
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  tracing:
+    sampling:
+      probability: 1.0
+
+# Logging
+logging:
+  level:
+    com.nexaforge.workflow: DEBUG
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-}] [%X{spanId:-}] %-5level %logger{36} - %msg%n"

@@ -1,0 +1,76 @@
+name: Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        project:
+          - workflow-orchestration-platform
+          - event-driven-order-platform
+          - realtime-streaming-analytics
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build ${{ matrix.project }}
+        run: |
+          if [ "${{ matrix.project }}" == "workflow-orchestration-platform" ]; then
+            ./mvnw -pl ${{ matrix.project }} clean verify -B
+          else
+            ./mvnw -pl ${{ matrix.project }} -am clean verify -B
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.project }}
+          path: |
+            ${{ matrix.project }}/**/target/surefire-reports/
+            ${{ matrix.project }}/**/target/failsafe-reports/
+          retention-days: 7
+
+  build-all:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build all projects
+        run: ./mvnw clean package -DskipTests -B
+
+      - name: Summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "All 3 portfolio projects built successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Project | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| workflow-orchestration-platform | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| event-driven-order-platform | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| realtime-streaming-analytics | ✅ |" >> $GITHUB_STEP_SUMMARY

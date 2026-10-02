@@ -1,0 +1,39 @@
+server:
+  port: 8091
+spring:
+  application:
+    name: event-producer
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: 1
+      batch-size: 16384
+      linger-ms: 5
+      buffer-memory: 33554432
+      properties:
+        max.in.flight.requests.per.connection: 5
+
+kafka:
+  topics:
+    click-events: analytics.click-events
+
+generator:
+  events-per-batch: 100
+  interval-ms: 100
+  user-pool-size: 1000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.nexaforge.producer: INFO

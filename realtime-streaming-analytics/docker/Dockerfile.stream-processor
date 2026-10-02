@@ -1,0 +1,26 @@
+# Stream Processor Dockerfile
+FROM eclipse-temurin:21-jre-alpine
+
+LABEL maintainer="nexaforge"
+LABEL description="Stream Processor - Kafka consumer with windowed aggregation"
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Copy built JAR
+COPY stream-processor/target/stream-processor-*.jar app.jar
+
+# Set ownership
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+EXPOSE 8082
+
+# JVM tuning for containers with higher memory for stream processing
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:G1HeapRegionSize=16m"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
