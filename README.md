@@ -9,14 +9,16 @@ Production-quality backend engineering portfolio demonstrating distributed syste
 
 ## 🏗️ Projects Overview
 
-| # | Project | Description | Key Technologies |
-|---|---------|-------------|------------------|
-| 1 | [Workflow Orchestration Platform](workflow-orchestration-platform/) | Distributed state machine with saga patterns | State Machines, Kafka, PostgreSQL |
-| 2 | [Event-Driven Order Platform](event-driven-order-platform/) | Microservices with choreography saga | Kafka, Transactional Outbox, Redis |
-| 3 | [Real-Time Streaming Analytics](realtime-streaming-analytics/) | High-throughput event processing | Kafka, Elasticsearch, Windowed Aggregation |
-| 4 | Production API Platform | *(Coming Soon)* | GraphQL, Rate Limiting, API Gateway |
-| 5 | Cloud-Native Microservices | *(Coming Soon)* | Kubernetes, Service Mesh, GitOps |
-| 6 | Observability Platform | *(Coming Soon)* | Prometheus, Grafana, Distributed Tracing |
+| # | Project | Description | Tests | Key Technologies |
+|---|---------|-------------|-------|------------------|
+| 1 | [Workflow Orchestration Platform](workflow-orchestration-platform/) | Distributed state machine with saga patterns | 13 | State Machines, Kafka, PostgreSQL |
+| 2 | [Event-Driven Order Platform](event-driven-order-platform/) | Microservices with choreography saga | 8 | Kafka, Transactional Outbox, Redis |
+| 3 | [Real-Time Streaming Analytics](realtime-streaming-analytics/) | High-throughput event processing | 68 | Kafka, Elasticsearch, Windowed Aggregation |
+| 4 | [Production API Platform](production-api-platform/) | API Gateway with GraphQL & rate limiting | 69 | GraphQL/DGS, JWT, Rate Limiting, API Gateway |
+| 5 | [Cloud-Native Microservices](cloud-native-microservices/) | Kubernetes-ready microservices platform | 47 | Kubernetes, Istio, OpenFeign, Kustomize |
+| 6 | [Observability & Reliability Platform](observability-reliability-platform/) | Full observability stack with SLOs | 164 | Prometheus, Grafana, Jaeger, SLO Management |
+
+**Total: 369 tests across 6 production-quality projects**
 
 ## ✨ Skills Demonstrated
 
@@ -26,53 +28,78 @@ Production-quality backend engineering portfolio demonstrating distributed syste
 - CQRS and Event Sourcing
 - Saga patterns (Orchestration & Choreography)
 - Domain-Driven Design (DDD)
+- API Gateway patterns
+- Service mesh architecture
+- SRE practices (SLOs, Error Budgets)
 
 ### Backend Technologies
 - **Languages**: Java 21 (Records, Virtual Threads, Pattern Matching)
-- **Frameworks**: Spring Boot 3.x, Spring Data, Spring Kafka
+- **Frameworks**: Spring Boot 3.x, Spring Data, Spring Kafka, Spring Cloud OpenFeign
 - **Messaging**: Apache Kafka (KRaft mode), Redis Pub/Sub
 - **Databases**: PostgreSQL, Redis, Elasticsearch
-- **API Design**: REST, OpenAPI 3.0, GraphQL
+- **API Design**: REST, OpenAPI 3.0, GraphQL (DGS Framework)
+- **Security**: JWT Authentication, API Key Validation, Rate Limiting
 
 ### DevOps & Infrastructure
 - Docker & Docker Compose
-- Kubernetes manifests
+- Kubernetes manifests (Deployment, Service, HPA, PDB)
+- Kustomize overlays (dev/prod environments)
+- Istio VirtualService for traffic management
 - GitHub Actions CI/CD
 - Infrastructure as Code
 
-### Observability
-- Prometheus metrics
-- Grafana dashboards
-- Distributed tracing (OpenTelemetry)
+### Observability & Reliability
+- Prometheus metrics collection
+- Grafana dashboards (pre-configured)
+- Distributed tracing (Jaeger, OpenTelemetry)
+- Alertmanager with alert rules
+- SLO/SLI management with error budgets
+- Health check orchestration
 - Structured logging (JSON)
 
 ## 📁 Repository Structure
 
 ```
 backend-portfolio-projects/
-├── workflow-orchestration-platform/     # Project 1
+├── workflow-orchestration-platform/     # Project 1: State Machine Engine
 │   ├── src/main/java/...
 │   ├── docker/
-│   └── docs/
-├── event-driven-order-platform/         # Project 2
+│   └── README.md
+├── event-driven-order-platform/         # Project 2: E-Commerce Microservices
 │   ├── order-service/
 │   ├── inventory-service/
 │   ├── payment-service/
 │   ├── shipping-service/
 │   ├── notification-service/
-│   ├── common/
-│   ├── outbox-processor/
-│   └── docker/
-├── realtime-streaming-analytics/        # Project 3
+│   └── common-events/
+├── realtime-streaming-analytics/        # Project 3: Stream Processing
 │   ├── event-producer/
 │   ├── stream-processor/
-│   ├── analytics-api/
+│   └── analytics-api/
+├── production-api-platform/             # Project 4: API Gateway & GraphQL
+│   ├── src/main/java/.../gateway/       # API Gateway
+│   ├── src/main/java/.../graphql/       # GraphQL Resolvers
+│   ├── src/main/java/.../ratelimit/     # Rate Limiting
+│   ├── src/main/java/.../security/      # JWT & API Keys
 │   └── docker/
-├── production-api-platform/             # Project 4 (TODO)
-├── cloud-native-microservices/          # Project 5 (TODO)
-├── observability-reliability-platform/  # Project 6 (TODO)
+├── cloud-native-microservices/          # Project 5: K8s Platform
+│   ├── src/main/java/.../product/       # Product Service
+│   ├── src/main/java/.../user/          # User Service
+│   ├── src/main/java/.../inventory/     # Inventory Service
+│   ├── src/main/java/.../notification/  # Notification Service
+│   ├── k8s/base/                        # K8s manifests
+│   ├── k8s/overlays/                    # Kustomize overlays
+│   └── docker/
+├── observability-reliability-platform/  # Project 6: Observability Stack
+│   ├── src/main/java/.../metrics/       # Metrics Collection
+│   ├── src/main/java/.../tracing/       # Distributed Tracing
+│   ├── src/main/java/.../alerting/      # Alert Management
+│   ├── src/main/java/.../slo/           # SLO Management
+│   ├── src/main/java/.../health/        # Health Checks
+│   ├── docker/prometheus/               # Prometheus config
+│   ├── docker/grafana/                  # Grafana dashboards
+│   └── docker/alertmanager/             # Alertmanager config
 ├── pom.xml                              # Parent POM
-├── Makefile
 └── README.md
 ```
 
@@ -82,7 +109,7 @@ backend-portfolio-projects/
 
 - Java 21+
 - Maven 3.8+
-- Docker & Docker Compose
+- Docker & Docker Compose (optional, for full stack)
 
 ### Build All Projects
 
@@ -92,28 +119,34 @@ git clone https://github.com/shariquefaizi94-beep/backend-portfolio-projects.git
 cd backend-portfolio-projects
 
 # Build all modules
-make build
+mvn clean install
 
 # Run all tests
-make test
+mvn test
 ```
 
 ### Run Individual Projects
 
-Each project has its own Docker Compose setup for running locally:
+Each project can run standalone or with Docker Compose for the full stack:
 
 ```bash
 # Project 1: Workflow Orchestration
 cd workflow-orchestration-platform
-make docker-up
+mvn spring-boot:run
 
-# Project 2: Event-Driven Orders
-cd event-driven-order-platform
-make docker-up
+# Project 4: Production API Platform
+cd production-api-platform
+mvn spring-boot:run
+# Access GraphQL Playground at http://localhost:8080/graphiql
 
-# Project 3: Streaming Analytics
-cd realtime-streaming-analytics
-make docker-up
+# Project 5: Cloud-Native Microservices
+cd cloud-native-microservices
+mvn spring-boot:run
+
+# Project 6: Observability Platform (with full stack)
+cd observability-reliability-platform
+docker-compose up -d
+# Access: App (8080), Prometheus (9090), Grafana (3000), Jaeger (16686)
 ```
 
 ## 📊 Project Details
@@ -128,7 +161,6 @@ make docker-up
 - Compensation/rollback via saga
 - Retry with exponential backoff
 - Dead letter queue handling
-- Full observability
 
 **Test Coverage**: 13 unit tests
 
@@ -143,9 +175,8 @@ make docker-up
 - Transactional outbox for reliable messaging
 - Eventually consistent distributed transactions
 - Automatic compensation on failures
-- Redis caching for performance
 
-**Modules**: 7 (5 services + common + outbox-processor)  
+**Modules**: 6 (5 services + common-events)  
 **Test Coverage**: 8 unit tests
 
 ---
@@ -159,10 +190,55 @@ make docker-up
 - Tumbling window aggregations
 - Redis-based deduplication
 - Elasticsearch for analytics storage
-- Pre-built Grafana dashboards
 
 **Modules**: 3 (event-producer, stream-processor, analytics-api)  
 **Test Coverage**: 68 unit tests
+
+---
+
+### Project 4: Production API Platform
+
+**Problem**: Production APIs need robust gateway functionality, flexible querying, and protection against abuse.
+
+**Solution**: Enterprise API platform with:
+- **API Gateway**: Route management, request/response transformation
+- **GraphQL**: Product, Order, User resolvers with DGS framework
+- **Rate Limiting**: Tiered limits (Basic: 100/min, Pro: 500/min, Enterprise: 2000/min)
+- **Security**: JWT authentication, API key validation
+- **Caching**: In-memory caching for performance
+
+**Test Coverage**: 69 unit tests
+
+---
+
+### Project 5: Cloud-Native Microservices
+
+**Problem**: Modern applications need to be cloud-native with proper orchestration, resilience, and deployment patterns.
+
+**Solution**: Kubernetes-ready microservices platform with:
+- **Services**: Product, User, Inventory, Notification
+- **Service Communication**: OpenFeign clients with resilience fallbacks
+- **Kubernetes Manifests**: Deployment, Service, HPA, PDB
+- **Traffic Management**: Istio VirtualService for canary deployments
+- **Environment Management**: Kustomize overlays for dev/prod
+
+**Test Coverage**: 47 unit tests
+
+---
+
+### Project 6: Observability & Reliability Platform
+
+**Problem**: Production systems need comprehensive observability for debugging, performance analysis, and reliability.
+
+**Solution**: Full observability platform with:
+- **Metrics**: Custom metric definitions, data point collection, aggregations
+- **Tracing**: Distributed tracing with span management and service maps
+- **SLOs**: Service Level Objectives with error budget tracking
+- **Alerting**: Alert rules, incident management, notifications
+- **Health**: Health check orchestration with component monitoring
+- **Stack**: Prometheus, Grafana (with dashboards), Jaeger, Alertmanager
+
+**Test Coverage**: 164 unit tests
 
 ## 🛠️ Tech Stack Summary
 
@@ -170,9 +246,12 @@ make docker-up
 |----------|--------------|
 | **Language** | Java 21 |
 | **Framework** | Spring Boot 3.2.5 |
+| **GraphQL** | Netflix DGS Framework |
 | **Messaging** | Apache Kafka 7.6.0 (KRaft) |
 | **Databases** | PostgreSQL 16, Redis 7.2, Elasticsearch 8.13 |
-| **Monitoring** | Prometheus, Grafana, OpenTelemetry |
+| **Monitoring** | Prometheus, Grafana, Jaeger, Alertmanager |
+| **Tracing** | Micrometer Tracing, OpenTelemetry |
+| **Cloud Native** | Kubernetes, Istio, Kustomize |
 | **Build** | Maven 3.9.x |
 | **Containers** | Docker, Docker Compose |
 | **CI/CD** | GitHub Actions |
@@ -181,25 +260,76 @@ make docker-up
 
 ```bash
 # Run all tests across all projects
-make test
+mvn test
 
 # Run tests for specific project
-make test-workflow
-make test-orders
-make test-streaming
+mvn test -pl workflow-orchestration-platform
+mvn test -pl production-api-platform
+mvn test -pl cloud-native-microservices
+mvn test -pl observability-reliability-platform
 
 # Run with coverage
-make test-coverage
+mvn test jacoco:report
 ```
 
-## 📈 Metrics
+## 📈 Portfolio Metrics
 
 | Metric | Value |
 |--------|-------|
-| Total Source Files | 180+ |
-| Total Lines of Code | 15,000+ |
-| Total Unit Tests | 89+ |
-| Projects Completed | 3/6 |
+| Total Source Files | 300+ |
+| Total Lines of Code | 25,000+ |
+| Total Unit Tests | 369 |
+| Projects Completed | 6/6 ✅ |
+
+## 🎯 Architecture Highlights
+
+### API Gateway Pattern (Project 4)
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Client    │────▶│ API Gateway │────▶│  Services   │
+└─────────────┘     │ • Routing   │     │ • Products  │
+                    │ • Auth      │     │ • Orders    │
+                    │ • Rate Limit│     │ • Users     │
+                    └─────────────┘     └─────────────┘
+```
+
+### Cloud-Native Architecture (Project 5)
+```
+┌─────────────────────────────────────────────────────┐
+│                  Kubernetes Cluster                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│  │ Product  │  │   User   │  │Inventory │          │
+│  │ Service  │◀─│ Service  │─▶│ Service  │          │
+│  └──────────┘  └──────────┘  └──────────┘          │
+│       │              │              │               │
+│       └──────────────┼──────────────┘               │
+│                      ▼                              │
+│              ┌──────────────┐                       │
+│              │ Notification │                       │
+│              │   Service    │                       │
+│              └──────────────┘                       │
+└─────────────────────────────────────────────────────┘
+```
+
+### Observability Stack (Project 6)
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ Application │────▶│ Prometheus  │────▶│   Grafana   │
+│  Metrics    │     │  (Scrape)   │     │ (Dashboard) │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │
+       ▼
+┌─────────────┐     ┌─────────────┐
+│   Traces    │────▶│   Jaeger    │
+│  (Spans)    │     │ (Tracing)   │
+└─────────────┘     └─────────────┘
+       │
+       ▼
+┌─────────────┐     ┌─────────────┐
+│   Alerts    │────▶│Alertmanager │
+│  (Rules)    │     │(Notifications)│
+└─────────────┘     └─────────────┘
+```
 
 ## 📄 License
 
@@ -212,4 +342,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-*This portfolio demonstrates production-quality backend engineering skills. All code is original and designed for educational purposes.*
+*This portfolio demonstrates production-quality backend engineering skills for senior/staff-level positions. All code is original and follows industry best practices.*
